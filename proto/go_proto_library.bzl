@@ -243,8 +243,8 @@ def go_proto_library(name, srcs = None, deps = None,
   grpc_deps = []
   if has_services:
     grpc_deps += [
-        "@org_golang_x_net//context:go_default_library",
-        "@org_golang_google_grpc//:go_default_library",
+        "//external:org_golang_x_net",
+        "//external:org_golang_google_grpc",
     ]
   go_library(
       name = name,
