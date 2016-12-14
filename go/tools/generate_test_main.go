@@ -86,6 +86,48 @@ func main() {
 			if strings.HasPrefix(fn.Name.Name, "Benchmark") {
 				cases.BenchmarkNames = append(cases.BenchmarkNames, fn.Name.Name)
 			}
+
+			// Here we check the signature of the Test* function. To
+			// be considered a test:
+
+			// 1. The function should have a single argument.
+			if len(fn.Type.Params.List) != 1 {
+				continue
+			}
+
+			// 2. The function should return nothing.
+			if fn.Type.Results != nil {
+				continue
+			}
+
+			// 3. The only parameter should have a type identified as
+			//    *<something>.T
+			starExpr, ok := fn.Type.Params.List[0].Type.(*ast.StarExpr)
+			if !ok {
+				continue
+			}
+			selExpr, ok := starExpr.X.(*ast.SelectorExpr)
+			if !ok {
+				continue
+			}
+
+			// We do not descriminate on the referenced type of the
+			// parameter being *testing.T. Instead we assert that it
+			// should be *<something>.T. This is because the import
+			// could have been aliased as a different identifier.
+
+			if strings.HasPrefix(fn.Name.Name, "Test") {
+				if selExpr.Sel.Name != "T" {
+					continue
+				}
+				cases.TestNames = append(cases.TestNames, fn.Name.Name)
+			}
+			if strings.HasPrefix(fn.Name.Name, "Benchmark") {
+				if selExpr.Sel.Name != "B" {
+					continue
+				}
+				cases.BenchmarkNames = append(cases.BenchmarkNames, fn.Name.Name)
+			}
 		}
 	}
 
