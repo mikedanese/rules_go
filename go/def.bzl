@@ -48,6 +48,13 @@ def _go_prefix(ctx):
     prefix = prefix + "/"
   return prefix
 
+def _cmd_template(items, template):
+  return [
+      template.format(
+          path = i.path,
+          short_path = i.short_path,
+      )  for i in items]
+
 # TODO(bazel-team): it would be nice if Bazel had this built-in.
 def symlink_tree_commands(dest_dir, artifact_dict):
   """Symlink_tree_commands returns a list of commands to create the
@@ -206,7 +213,7 @@ def emit_go_compile_action(ctx, sources, deps, out_lib, extra_objects=[]):
   # Set -p to the import path of the library, ie.
   # (ctx.label.package + "/" ctx.label.name) for now.
   cmds += [ "export GOROOT=$(pwd)/" + ctx.file.go_tool.dirname + "/..",
-    ' '.join(args + cmd_helper.template(set(sources), prefix + "%{path}"))]
+    ' '.join(args + _cmd_template(set(sources), prefix + "%{path}"))]
   extra_inputs = ctx.files.toolchain
 
   if extra_objects:
@@ -440,7 +447,7 @@ def go_test_impl(ctx):
   go_import = _go_importpath(ctx)
 
   args = (["--package", go_import, "--output", ctx.outputs.main_go.path] +
-          cmd_helper.template(lib_result.go_sources, "%{path}"))
+          _cmd_template(lib_result.go_sources, "%{path}"))
 
   inputs = list(lib_result.go_sources) + list(ctx.files.toolchain)
   ctx.action(
