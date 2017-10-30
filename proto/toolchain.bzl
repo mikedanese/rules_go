@@ -1,4 +1,3 @@
-
 _protoc_prefix = "protoc-gen-"
 
 def _emit_proto_compile(ctx, proto_toolchain, go_proto_toolchain, lib, importpath):
@@ -8,7 +7,7 @@ def _emit_proto_compile(ctx, proto_toolchain, go_proto_toolchain, lib, importpat
     out = ctx.new_file(ctx.label.name + "/" + importpath + "/" + proto.basename[:-len(".proto")] + ".pb.go")
     go_srcs += [out]
     if outpath == None:
-        outpath = out.dirname[:-len(importpath)]
+        outpath = out.dirname[:-len(proto.dirname)]
   plugin_base_name = go_proto_toolchain.plugin.basename
   if plugin_base_name.startswith(_protoc_prefix):
     plugin_base_name = plugin_base_name[len(_protoc_prefix):]
@@ -54,7 +53,13 @@ def _proto_toolchain_impl(ctx):
 proto_toolchain = rule(
     _proto_toolchain_impl,
     attrs = {
-        "_protoc": attr.label(allow_files = True, single_file = True, executable = True, cfg = "host", default=Label("@com_github_google_protobuf//:protoc")),
+        "_protoc": attr.label(
+            allow_files = True,
+            single_file = True,
+            executable = True,
+            cfg = "host",
+            default = Label("@com_github_google_protobuf//:protoc"),
+        ),
     },
 )
 
@@ -71,6 +76,12 @@ go_proto_toolchain = rule(
     attrs = {
         "deps": attr.label_list(),
         "options": attr.string_list(),
-        "plugin": attr.label(allow_files = True, single_file = True, executable = True, cfg = "host", default=Label("@com_github_golang_protobuf//protoc-gen-go")),
+        "plugin": attr.label(
+            allow_files = True,
+            single_file = True,
+            executable = True,
+            cfg = "host",
+            default = Label("@com_github_golang_protobuf//protoc-gen-go"),
+        ),
     },
 )
