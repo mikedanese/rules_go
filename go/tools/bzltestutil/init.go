@@ -57,9 +57,4 @@ func init() {
 			os.Setenv("PWD", abs)
 		}
 	}
-
-	// Setup the bazel tmpdir as the go tmpdir.
-	if tmpDir, ok := os.LookupEnv("TEST_TMPDIR"); ok {
-		os.Setenv("TMPDIR", tmpDir)
-	}
 }
